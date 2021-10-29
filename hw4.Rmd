@@ -1,0 +1,38 @@
+---
+title: "hw4"
+output: html_document
+---
+
+## Load packages
+```{r}
+library(tidyverse)
+library(sf)
+library(here)
+library(janitor)
+library(countrycode)
+```
+## Read in data
+```{r}
+HDI <- read_csv(here::here("Data", "Gender Inequality Index (GII).csv"),
+                       locale = locale(encoding = "latin1"),
+                       na = "..", skip=5)
+World <- st_read(here::here("Data", "World_Countries__Generalized_.shp"))
+```
+## Manipulate csv data
+```{r}
+HDIcols<- HDI %>%
+  clean_names()%>%
+  select(country, x2019, x2010)%>%
+  mutate(difference=x2019-x2010)%>%
+  slice(1:189,)%>%
+  mutate(iso_code=countrycode(country, origin = 'country.name', destination = 'iso2c'))
+```
+## Join
+```{r}
+Join_HDI <- World %>% 
+  clean_names() %>%
+  left_join(., 
+            HDIcols,
+            by = c("aff_iso" = "iso_code"))
+```
+
